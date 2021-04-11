@@ -14,6 +14,8 @@ from pathlib import Path
 
 import environ
 
+from .secrets.retrievers.retriever_factory import RetrieverFactory
+
 env = environ.Env(
     DEBUG=(bool, False),
     ROLLBAR_ENABLED=(bool, False),
@@ -24,14 +26,12 @@ env = environ.Env(
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("SECRET_KEY")
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
+
+retriever = RetrieverFactory(is_prod=not DEBUG).create_retriever()
+SECRET_KEY = retriever.retrieve("SECRET_KEY")
+
 
 ALLOWED_HOSTS = ["*"]
 
@@ -98,7 +98,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": env("POSTGRES_DB"),
         "USER": env("POSTGRES_USER"),
-        "PASSWORD": env("POSTGRES_PASSWORD"),
+        "PASSWORD": retriever.retrieve("POSTGRES_PASSWORD"),
         "HOST": env("POSTGRES_HOST"),
         "PORT": 5432,
     }
@@ -207,7 +207,7 @@ DJOSER = {
 
 if env("ROLLBAR_ENABLED", default=False):
     ROLLBAR = {
-        "access_token": env("ROLLBAR_KEY"),
+        "access_token": retriever.retrieve("ROLLBAR_KEY"),
         "environment": "development" if DEBUG else "production",
         "branch": "master",
         "enabled": True,

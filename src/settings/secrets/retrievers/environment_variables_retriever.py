@@ -2,7 +2,6 @@ import environ
 
 from settings.secrets.retrievers.base_retriever import BaseSecretsRetriever
 
-
 env = environ.Env()
 
 
