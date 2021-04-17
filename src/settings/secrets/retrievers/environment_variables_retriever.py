@@ -2,9 +2,10 @@ import environ
 
 from settings.secrets.retrievers.base_retriever import BaseSecretsRetriever
 
-env = environ.Env()
-
 
 class EnvRetriever(BaseSecretsRetriever):
+    def __init__(self):
+        self.__env = environ.Env()
+
     def retrieve(self, name: str) -> str:
-        return env(name)
+        return self.__env(name)
